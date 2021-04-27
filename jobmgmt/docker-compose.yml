@@ -1,0 +1,32 @@
+version: '3.7'
+services:
+  worker.cloud.net: # mock server 1
+    image: mockserver/mockserver:mockserver-5.11.1
+    command: -logLevel DEBUG -serverPort 80
+    ports:
+      - 1080:80
+  worker.blob.net: # mock server 2
+    image: mockserver/mockserver:mockserver-5.11.1
+    command: -logLevel DEBUG -serverPort 80
+    ports:
+      - 1081:80
+  image.processor.net:
+    image: image-processor:latest
+    ports:
+      - 8080:8080
+    links: 
+      - worker.blob.net
+      - worker.cloud.net
+    depends_on: 
+      - inject_mock
+  inject_mock: # throw away service for loading mock data to the mockservers
+    image: curlimages/curl
+    volumes: 
+      - ./mock-services:/mock
+    command: ./mock/run.sh
+    depends_on: 
+      - worker.blob.net
+      - worker.cloud.net
+    links: 
+      - worker.blob.net
+      - worker.cloud.net

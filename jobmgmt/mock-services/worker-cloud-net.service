@@ -1,0 +1,54 @@
+# Job endpoint returns mock success data
+curl -v -X PUT "http://worker.cloud.net/mockserver/expectation" -d '{
+	"httpRequest": {
+		"method": "POST",
+		"path": "/api/v1/job"
+	},
+	"httpResponse": {
+		"headers": {
+			"Content-Type": [
+				"plain/text"
+			]
+		},
+		"statusCode": 200,
+		"reasonPhrase": "OK",
+		"body": "SUCCESS"
+	}
+}'
+
+# Status of Success Job Req/Res
+curl -v -X PUT "http://worker.cloud.net/mockserver/expectation" -d '{
+	"httpRequest": {
+		"method": "GET",
+		"path": "/api/v1/job/1/status",
+	},
+	"httpResponse": {
+		"statusCode": 200,
+		"body": "SUCCESS"
+	}
+}'
+
+# Status of Running Job Req/Res
+curl -v -X PUT "http://worker.cloud.net/mockserver/expectation" -d '{
+	"httpRequest": {
+		"method": "GET",
+		"path": "/api/v1/job/2/status"
+	},
+	"httpResponse": {
+		"statusCode": 200,
+		"body": "RUNNING"
+	}
+}'
+
+# Status of Failed Job Req/Res
+curl -v -X PUT "http://worker.cloud.net/mockserver/expectation" -d '{
+	"httpRequest": {
+		"method": "GET",
+		"path": "/api/v1/job/3/status"
+	},
+	"httpResponse": {
+		"statusCode": 200,
+		"body": "FAILED"
+	}
+}'
+
