@@ -12,6 +12,8 @@ import java.security.Key;
 import java.time.Instant;
 import java.util.Date;
 
+import static net.cloud.imageprocessor.util.Constants.*;
+
 @Log4j2
 @Component
 public final class JwtHelper {
@@ -58,11 +60,11 @@ public final class JwtHelper {
                 .subject(body.getSubject())
                 .issueAt(body.getIssuedAt())
                 .audience(body.getAudience())
-                .name(String.valueOf(body.get("name")))
-                .tenantId(String.valueOf(body.get("tid")))
-                .clientId(String.valueOf(body.get("oid")))
-                .appId(String.valueOf(body.get("azp")))
-                .email(String.valueOf(body.get("email"))).build();
+                .name(String.valueOf(body.get(NAME)))
+                .tenantId(String.valueOf(body.get(TENANT_ID)))
+                .clientId(String.valueOf(body.get(CLIENT_ID)))
+                .appId(String.valueOf(body.get(APP_ID)))
+                .email(String.valueOf(body.get(EMAIL))).build();
     }
 
     private String extractJwsString(String jwtString) {
@@ -77,11 +79,11 @@ public final class JwtHelper {
                 .setSubject("1234567890")
                 .setIssuedAt(Date.from(Instant.now()))
                 .setAudience("com.company.jobservice")
-                .claim("name", "John Doe")
-                .claim("tid", 1)
-                .claim("oid", 1)
-                .claim("azp", "1")
-                .claim("email", "customer@mail.com")
+                .claim(NAME, "John Doe")
+                .claim(TENANT_ID, 1)
+                .claim(CLIENT_ID, 1)
+                .claim(APP_ID, "1")
+                .claim(EMAIL, "customer@mail.com")
                 .signWith(key).compact();
     }
 
