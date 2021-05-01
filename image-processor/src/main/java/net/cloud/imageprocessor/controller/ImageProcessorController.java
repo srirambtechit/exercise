@@ -9,10 +9,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import static net.cloud.imageprocessor.util.Constants.X_JWT_TOKEN;
+
 @Log4j2
 @RestController
 public class ImageProcessorController {
-
     private final RequestMessageVerifier requestMessageVerifier;
     private final ImageProcessorCoordinator imageProcessorCoordinator;
 
@@ -23,7 +24,7 @@ public class ImageProcessorController {
     }
 
     @PostMapping(value = "/job")
-    public ResponseEntity<String> createJob(@RequestHeader("X-Jwt-Token") String jwt,
+    public ResponseEntity<String> createJob(@RequestHeader(X_JWT_TOKEN) String jwt,
                                             @RequestBody JobSubmitRequest jobRequest) {
         log.info("Job payload {}", jobRequest);
         requestMessageVerifier.validateChecksum(jobRequest.getMd5Checksum(), jobRequest.getContent());
@@ -31,13 +32,13 @@ public class ImageProcessorController {
     }
 
     @GetMapping("/job/{id}/status")
-    public ResponseEntity<String> getJobStatus(@PathVariable Integer id, @RequestHeader("X-Jwt-Token") String jwt) {
+    public ResponseEntity<String> getJobStatus(@PathVariable Integer id) {
         log.info("Job status {}", id);
         return imageProcessorCoordinator.fetchJobStatus(id);
     }
 
     @GetMapping(value = "/job/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
-    public ResponseEntity<byte[]> getJobResult(@PathVariable Integer id, @RequestHeader("X-Jwt-Token") String jwt) {
+    public ResponseEntity<byte[]> getJobResult(@PathVariable Integer id) {
         log.info("Job result {}", id);
         return imageProcessorCoordinator.fetchJobResult(id);
     }

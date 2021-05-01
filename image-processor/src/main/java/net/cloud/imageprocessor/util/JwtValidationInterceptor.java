@@ -9,6 +9,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Objects;
 
+import static net.cloud.imageprocessor.util.Constants.X_JWT_TOKEN;
+
 @Log4j2
 @Component
 public class JwtValidationInterceptor implements HandlerInterceptor {
@@ -21,7 +23,7 @@ public class JwtValidationInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String jwtString = request.getHeader("X-Jwt-Token");
+        String jwtString = request.getHeader(X_JWT_TOKEN);
         log.info("VHI: " + jwtString);
         if (Objects.isNull(jwtString))
             throw new UnauthorizedException("Jwt token is required");
