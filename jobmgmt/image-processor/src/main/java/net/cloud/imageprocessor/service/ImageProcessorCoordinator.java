@@ -6,12 +6,8 @@ import net.cloud.imageprocessor.model.JobSubmitRequest;
 import net.cloud.imageprocessor.model.JsonWebToken;
 import net.cloud.imageprocessor.util.HttpInvoker;
 import net.cloud.imageprocessor.util.JwtHelper;
-import net.cloud.imageprocessor.util.RequestMessageVerifier;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
 
 @Service
 public class ImageProcessorCoordinator {
@@ -19,22 +15,11 @@ public class ImageProcessorCoordinator {
     private final JwtHelper jwtHelper;
     private final HttpInvoker httpInvoker;
     private final JobUrlProvider jobUrlProvider;
-    private final RequestMessageVerifier requestMessageVerifier;
 
-    @Autowired
-    public ImageProcessorCoordinator(JwtHelper jwtHelper, JobUrlProvider jobUrlProvider,
-                                     HttpInvoker httpInvoker, RequestMessageVerifier requestMessageVerifier) {
+    public ImageProcessorCoordinator(JwtHelper jwtHelper, JobUrlProvider jobUrlProvider, HttpInvoker httpInvoker) {
         this.jwtHelper = jwtHelper;
         this.httpInvoker = httpInvoker;
         this.jobUrlProvider = jobUrlProvider;
-        this.requestMessageVerifier = requestMessageVerifier;
-    }
-
-    public void validate(String jwtToken, JobSubmitRequest jobSubmitRequest) {
-        jwtHelper.verify(jwtToken);
-        if (!Objects.isNull(jobSubmitRequest)) {
-            requestMessageVerifier.validateChecksum(jobSubmitRequest.getMd5Checksum(), jobSubmitRequest.getContent());
-        }
     }
 
     public ResponseEntity<String> submitJob(JobSubmitRequest jobSubmitRequest, String jwtString) {

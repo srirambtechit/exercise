@@ -2,6 +2,8 @@ package net.cloud.imageprocessor.util;
 
 import lombok.extern.log4j.Log4j2;
 import net.cloud.imageprocessor.exception.ChecksumNotMatchException;
+import net.cloud.imageprocessor.exception.ImageProcessorException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.DatatypeConverter;
@@ -23,7 +25,7 @@ public class RequestMessageVerifier {
                 throw new ChecksumNotMatchException("Checksum mismatch: MD5(input) != <generated md5 checksum>");
         } catch (NoSuchAlgorithmException e) {
             log.error("MD5 algorithm is missing, reason {}", e.getMessage());
-            throw new ChecksumNotMatchException(e.getMessage());
+            throw new ImageProcessorException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 

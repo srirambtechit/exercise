@@ -33,6 +33,17 @@ public class ImageProcessorExceptionHandler {
                 .body(exception.prepareMessage());
     }
 
+    @ExceptionHandler(ImageProcessorException.class)
+    public ResponseEntity<String> imageProcessorErrorHandler(ImageProcessorException exception) {
+        log.error("Image processor error: {}", exception.getMessage());
+
+        // additional error handling
+
+        return ResponseEntity.status(exception.getHttpStatus())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(exception.prepareMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> allExceptionHandler(Exception exception) {
         log.error("Generic error: {}", exception.getMessage());
@@ -41,9 +52,6 @@ public class ImageProcessorExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body("{" +
-                         "\"error\": \"Server Unhandled\"," +
-                         "\"message\":" + exception.getMessage() +
-                      "}");
+                .body(AbstractApplicationException.defaultMessage(exception));
     }
 }

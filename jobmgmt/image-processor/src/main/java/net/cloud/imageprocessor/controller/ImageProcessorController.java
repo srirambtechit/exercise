@@ -4,7 +4,7 @@ import lombok.extern.log4j.Log4j2;
 import net.cloud.imageprocessor.model.JobSubmitRequest;
 import net.cloud.imageprocessor.service.ImageProcessorCoordinator;
 import net.cloud.imageprocessor.util.JwtHelper;
-import org.springframework.beans.factory.annotation.Autowired;
+import net.cloud.imageprocessor.util.RequestMessageVerifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class ImageProcessorController {
 
+    private final RequestMessageVerifier requestMessageVerifier;
     private final ImageProcessorCoordinator imageProcessorCoordinator;
 
-    @Autowired
-    public ImageProcessorController(ImageProcessorCoordinator imageProcessorCoordinator) {
+    public ImageProcessorController(RequestMessageVerifier requestMessageVerifier,
+                                    ImageProcessorCoordinator imageProcessorCoordinator) {
+        this.requestMessageVerifier = requestMessageVerifier;
         this.imageProcessorCoordinator = imageProcessorCoordinator;
     }
 
@@ -24,21 +26,19 @@ public class ImageProcessorController {
     public ResponseEntity<String> createJob(@RequestHeader("X-Jwt-Token") String jwt,
                                             @RequestBody JobSubmitRequest jobRequest) {
         log.info("Job payload {}", jobRequest);
-        imageProcessorCoordinator.validate(jwt, jobRequest);
+        requestMessageVerifier.validateChecksum(jobRequest.getMd5Checksum(), jobRequest.getContent());
         return imageProcessorCoordinator.submitJob(jobRequest, jwt);
     }
 
     @GetMapping("/job/{id}/status")
     public ResponseEntity<String> getJobStatus(@PathVariable Integer id, @RequestHeader("X-Jwt-Token") String jwt) {
         log.info("Job status {}", id);
-        imageProcessorCoordinator.validate(jwt, null);
         return imageProcessorCoordinator.fetchJobStatus(id);
     }
 
     @GetMapping(value = "/job/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<byte[]> getJobResult(@PathVariable Integer id, @RequestHeader("X-Jwt-Token") String jwt) {
         log.info("Job result {}", id);
-        imageProcessorCoordinator.validate(jwt, null);
         return imageProcessorCoordinator.fetchJobResult(id);
     }
 
