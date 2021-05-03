@@ -38,36 +38,39 @@ Image Processor Service Design
 - SpringBoot based microservice
 - Simple flow and design as follows
 
-          client ---------(0)------------+
-            ^                            |
-            |                            V
-            +----(7)--------- HttpRes  HttpReq
-                                 ^      | 
-                                 |     (1)
-                                (6)     |                 
-                                 |      v                    (ImgProcCord)
-                           ImageProcessorController --(2)-> ImageProcessorCoordinator
-                                (ImgProcCtlr)                    |    |     |
-              (E)                                                |    |     |
-  ImageProcessorExceptionHandler                                (3)   |     |
-               ^           ^                                     |    |     |
-               |           |                                     |    |     |
-               |           |                                     |    |     |
-               |  UnauthorizedException <-(E1)- JwtHelper  <-----+   (4)   (5) submitJob()
-               |                                                      |    (5) fetchJobStatus()
-       ChecksumNotMatchException <-(E2)- RequestMessageVerifier <-----+    (5) fetchJobResult()
-                                                                            |
-                                              HttpInvoker <-----------------+
+          client ---------(0)----------------+
+            ^                                |
+            |                                V
+            +----(7)--------- HttpRes     HttpReq
+                                 ^           | 
+                                 |          (1)
+                                (6)          |                 
+                                 |           V                    
+          +--(E1)-- JwtHelper <--|--(2)-- JwtValidationInterceptor    
+          |                      |           | (preHandle flow)
+          |                      |          (3)
+          |                      |           |
+          V                      |           V                    
+ UnauthorizedException     ImageProcessorController --(4)-> ImageProcessorCoordinator
+          |                                                     (ImageProcessorTask)   
+          V   (E)                                                   |     |
+  ImageProcessorExceptionHandler                                    |     |
+          ^                                                         |     |
+          |                                                       (5.1) (5.2) submitJob()
+          |                                                         |    (5) fetchJobStatus()
+  ChecksumNotMatchException <--(E2)----- RequestMessageVerifier <---+    (5) fetchJobResult()
+                                                                          |
+                                              HttpInvoker <---------------+
                                                    |
                                                    |---> making api call to http://worker.cloud.net
                                                    |
                                                    |---> making api call to http://worker.blob.net
   
-  (1) ImgProcCtlr Receive http request from client
+  (1) ImageProcessorController Receive http request from client
 
-  (2) ImgProcCtlr hand over the processing to ImgProcCord (business layer)
+  (2) ImageProcessorController hand over the processing to ImgProcCord (business layer)
 
-  (3) ImgProcCord verifies the authenticity of the request (by inspecting jwt).
+  (3) ImageProcessorCoordinator verifies the authenticity of the request (by inspecting jwt).
       if jwt invalid, throws UnauthorizedException (E1)
 
   (4) ImgProcCord verifies the json message payload (by inspecting md5 checksum)
