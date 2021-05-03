@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ImageProcessorCoordinator {
+public class ImageProcessorCoordinator implements ImageProcessorTask {
 
     private final JwtHelper jwtHelper;
     private final HttpInvoker httpInvoker;
@@ -22,6 +22,7 @@ public class ImageProcessorCoordinator {
         this.jobUrlProvider = jobUrlProvider;
     }
 
+    @Override
     public ResponseEntity<String> submitJob(JobSubmitRequest jobSubmitRequest, String jwtString) {
         String url = jobUrlProvider.getSubmitUrl();
         JsonWebToken jwt = jwtHelper.parseClaims(jwtString);
@@ -36,11 +37,13 @@ public class ImageProcessorCoordinator {
         return httpInvoker.executePost(url, job, String.class);
     }
 
+    @Override
     public ResponseEntity<String> fetchJobStatus(Integer id) {
         String url = String.format(jobUrlProvider.getStatusUrl(), id);
         return httpInvoker.executeGet(url, String.class);
     }
 
+    @Override
     public ResponseEntity<byte[]> fetchJobResult(Integer id) {
         String url = String.format(jobUrlProvider.getResultUrl(), id);
         return httpInvoker.executeGet(url, byte[].class);
